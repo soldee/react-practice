@@ -2,6 +2,6 @@
 
 1. [Introduction](docs/Introduction.md)
 
-2. [HTTP requests](docs/HTTP_requests.md)
+2. [Class-based components](docs/Class-based_components.md)
 
-3. [Class-based components](docs/Class-based_components.md)
+3. [HTTP requests](docs/HTTP_requests.md)
