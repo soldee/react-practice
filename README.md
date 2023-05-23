@@ -6,4 +6,6 @@
 
 3. [HTTP requests](docs/HTTP_requests.md)
 
-4. [React router](docs/Router.md)
+4. [Redux](docs/Redux.md)
+
+5. [React router](docs/Router.md)
