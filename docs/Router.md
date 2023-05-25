@@ -1,5 +1,157 @@
 ## React Router
 
+- Different URL paths load different content on the screen
+- Building SPAs (Single Page Application)
+  - Only one initial HTML request & response
+  - Page (URL) changes are then handled by client-side code
+    - Changes the visible content without fetching a new HTML file
+
+- Installation
+  - npm install react-router-dom
+
+<br>
+
+### Minimal setup
+```js
+const router = createBrowserRouter([
+  { path: '/', element: <HomePage /> },
+  { path: '/products', element: <Products /> }
+]);
+
+function App() {
+  return <RouterProvider router={router} />
+}
+```
+
+- Browsing between pages
+  - If we change the page like this, it will cause the browser to send an HTTP request to the backend to reload all the js files.
+```js
+function HomePage() {
+	return <>
+	  <h1>My home page</h1>
+	  <p>Go to <a href="/products">Products</a></p>
+	</>
+}
+```
+Instead, we should use Link:
+```js
+function HomePage() {
+  return <>
+    <h1>My home page</h1>
+    <p>Go to <Link to="/products">Products</Link></p>
+  </>
+```
+
+<br>
+
+### Layouts and nested routes
+  - We can use this to wrap routes.
+  - In this example we wrap all routes with a RootLayout that will always render a MainNavigation component and then will render the children depending on the current path
+
+```js
+const router = createBrowserRouter([
+  { 
+    path:'/', 
+    element:  <RootLayout />,
+    children: [
+      { path: '/', element: <HomePage /> },
+      { path: '/products', element: <Products /> }
+    ]
+  }
+]);
+
+function MainNavigation() {
+    return (
+        <header>
+            <nav>
+                <ul>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/products">Products</Link></li>
+                </ul>
+            </nav>
+        </header>
+    );
+}
+
+function RootLayout() {
+    return(
+        <>
+            <MainNavigation />
+            <Outlet />
+        </>
+    );
+};
+```
+
+<br>
+
+### Showing error pages
+- When we try to navigate to a page that is not mapped to any url, react-router throws a default error.
+- We can modify this error by using errorElement prop to render the component that we need:
+```js
+const router = createBrowserRouter([
+  { 
+    path:'/', 
+    element:  <RootLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { path: '/', element: <HomePage /> },
+      { path: '/products', element: <Products /> }
+    ]
+  }
+]);
+```
+
+<br>
+
+### NavLink
+- Like a react-router link but accepts a new prop called className which in turn accepts a function to which we can pass a isActive property.
+- isActive property is a boolean that indicates controlled by react-router that indicates wheter the link is active or not
+- we can use this to control the CSS class of the Link to for example highlight the Products link when we are in the products page
+
+```js
+function MainNavigation() {
+  return (
+    <header>
+    <nav>
+      <ul>
+        <li><NavLink 
+            className={({isActive}) => (isActive ? classes.active : undefined) }  
+            to="/"
+        >
+        Home
+        </NavLink></li>
+        <li><NavLink 
+          className={({isActive}) => (isActive ? classes.active : undefined) } 
+          to="/products"
+        >
+        Products
+        </NavLink></li>
+      </ul>
+    </nav>
+    </header>
+  );
+}
+```
+
+<br>
+
+### Routing programmatically
+- We can use useNavigate hook to navigate programatically between pages
+```js
+const navigate = useNavigate();
+  const navigateHandler = () => {
+    navigate('/products');
+  };
+
+  return <>
+    <h1>My home page</h1>
+      <p>Go to <Link to="/products">Products</Link></p>
+      <button onClick={navigateHandler}>Navigate</button>
+  </>
+```
+
+
 ### Dynamic routes
 - Podem utitlitzar paths que poden canviar depenent per exemple de un productId (com en aquest exemple)
 - Per a fer-ho utilitzem un placeholder a la creació del router utilitzant ":" i podem accedir al valor del placeholder amb el useParams hook i el nom especificat al placeholder
@@ -74,6 +226,56 @@ children: [
 
 <br>
 
+### Loader function
+- A function that we can pass to any route that will get executed by React before a specific route gets rendered
+- If we use an async function inside the loader, this types of functions return a Promise, but React will check if the returned object is a promise and get the object for us.
+- We can use the object returned by the loader function by using the useLoaderData hook
+  - The returned data can be used only by the rendered Page or subcomponents inside it
+- Note that to keep our App.js file leaner, we could declare the loader function inside the EventsPage.js file
+
+```js
+const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <RootLayout />,
+      children: [
+        { index: true, element: <HomePage /> },
+        { 
+          path: 'events', 
+          element: <EventsRootLayout />,
+          children: [
+            { 
+              index: true, 
+              element: <EventsPage />,
+              loader: async () => {
+                const response = await fetch('http://localhost:8080/events');
+
+                if (response.ok) {
+                  //...
+                } else {
+                  const resData = await response.json();
+                  return resData.events;
+                }
+              }
+            },
+            { path: ':event_id', element: <EventDetailPage /> },
+            { path: 'new', element: <NewEventPage /> },
+            { path: ':event_id', element: <EditEventPage /> }
+          ]
+        }
+      ]
+    }
+]);
+
+const EventsPage = () => {
+  const events = useLoaderData();
+  
+  return (<EventsList events={events} />);
+}
+```
+
+<br>
+
 ### loaders
 - Accessing loader data from other routes
 ```js
@@ -94,6 +296,77 @@ function EventDetailPage() {
     ]
 }
 ```
+
+<br>
+
+### Handling errors
+- We can include an errorElement in our router to handle all children errors
+
+```js
+const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <RootLayout />,
+      errorElement: <ErrorPage />,
+      children: [
+        { index: true, element: <HomePage /> },
+        { 
+          path: 'events', 
+          element: <EventsRootLayout />,
+          children: [
+            { 
+              index: true, 
+              element: <EventsPage />,
+              loader: eventsLoader
+            },
+            { path: ':event_id', element: <EventDetailPage /> },
+            { path: 'new', element: <NewEventPage /> },
+            { path: ':event_id', element: <EditEventPage /> }
+          ]
+        }
+      ]
+    }
+  ]);
+
+const ErrorPage = () => {
+
+    const error = useRouteError();
+
+    let title = 'An error occurred!';
+    let message = 'Something went wrong';
+
+    if (error.status === 500) {
+        message = error.data.message;
+    }
+    if (error.status === 404) {
+        title = 'Not found!';
+        message = 'Could not find resource or page';
+    }
+
+    return (
+        <>
+            <MainNavigation />
+            <h1>{title}</h1>
+            <h3>{message}</h3>
+        </>
+    );
+}
+```
+Then we can throw errors from a loader() function (for example), that are going to be catched by the Error component defined in the router
+```js
+export async function loader() {
+    const response = await fetch('http://localhost:8080/events');
+
+    if (response.ok) {
+      throw new Response(JSON.stringify({message: 'Could not fetch events'}), {status: 500})
+    } else {
+      const resData = await response.json();
+      return resData.events;
+    }
+}
+```
+We use the Response object to throw errors so that we can include the status property
+
 
 <br>
 
