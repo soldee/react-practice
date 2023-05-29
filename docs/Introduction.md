@@ -5,6 +5,15 @@
 
 <br>
 
+### Create react app
+```bash
+npx create-react-app my-app
+cd my-app
+npm start
+```
+
+<br>
+
 ### How does React work ?
 
 - The virtual DOM (VDOM) is a programming concept where a “virtual”, representation of a UI is kept in memory and synced with the “real” DOM by a library such as ReactDOM. This process is called reconciliation.
@@ -51,10 +60,10 @@ const show = useCallback(() => {
     setShow((prev) => {
         if (buttonsToggled) !prev
     });
-)}, [buttonsToggled]);
+}, [buttonsToggled]);
 ```
-    - Fem que es faci un ‘cache’ de la funció i s’anirà a buscar aquesta mateixa sempre que es re-evalui el component que la conté
-    - També admet un array de dependències opcional que serveix per a regenerar la funció si algun valor de les dependències de la funció canvia
+Fem que es faci un ‘cache’ de la funció i s’anirà a buscar aquesta mateixa sempre que es re-evalui el component que la conté
+- També admet un array de dependències opcional que serveix per a regenerar la funció si algun valor de les dependències de la funció canvia
 
 <br>
 
