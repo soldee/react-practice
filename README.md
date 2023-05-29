@@ -9,3 +9,5 @@
 4. [Redux](docs/Redux.md)
 
 5. [React router](docs/Router.md)
+
+6. [Authentication](docs/Authentication.md)
