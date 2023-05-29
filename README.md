@@ -11,3 +11,5 @@
 5. [React router](docs/Router.md)
 
 6. [Authentication](docs/Authentication.md)
+
+7. [Deployment](docs/Deployment.md)
