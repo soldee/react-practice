@@ -13,3 +13,5 @@
 6. [Authentication](docs/Authentication.md)
 
 7. [Deployment](docs/Deployment.md)
+
+8. [Next.js](docs/Nextjs.md)
